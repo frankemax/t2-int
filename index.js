@@ -21,5 +21,4 @@ const transformToList = (string) =>{
     const re = /,\s/
     let ar = string.split(re)
     console.log(ar)
-    
 }
