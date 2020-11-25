@@ -37,42 +37,57 @@ inputStream
     .on('data', function (row) {
         //console.log('A row arrived: ', row.writer)
         //listAllCrew.push(row.name)
-        header.push({[row.name]:row.name})
-        
+        header.push({[row.name]: row.name})
     })
     .on('end', function (data) {
         //console.log(listAllCrew)
         console.log('No more rows!');
-        console.log(header)
+        //console.log(header)
         readIMDBMovies()
     });
+
+let v = 0
 
 const readIMDBMovies = () => {
     inputMovies
         .pipe(new CsvReadableStream({parseNumbers: true, parseBooleans: true, trim: true, asObject: true}))
         .on('data', function (row) {
-            data.push(row)
-    
-            console.log(row)
-            let actorList = transformToList(row.actors)
+            //console.log(row)
+            if (v === 3) {
+                v++
+                //console.log(row)
+                let actorList = transformToList(row.actors)
+                console.log(actorList)
+                for (let i = 22; i < header.length; i++) {
+                    if(actorList.includes(Object.keys(header[i])[0])){
+                        console.log(Object.keys(header[i])[0])
+                    }
+                    row[Object.keys(header[i])[0]] = actorList.includes(Object.keys(header[i])[0]) ? 1 : 0
+
+                }
+                //console.log(Object.keys(row))
+
+                console.log('aaaaaa')
+
+                //console.log(row)
+                data.push(row)
+                const csvWriter = createCsvWriter({
+                    path: 'out.csv',
+                    header
+                });
+
+                csvWriter
+                    .writeRecords(data)
+                    .then(() => console.log('The CSV file was written successfully'));
+
+            } else {
+                v++
+            }
         })
         .on('end', function (data) {
-            console.log(listAllCrew)
             console.log('No more rows!');
-            data[0].for
-            const csvWriter = createCsvWriter({
-                path: 'path/to/file.csv',
-                header: [
-                    {id: 'name', title: 'NAME'},
-                    {id: 'lang', title: 'LANGUAGE'}
-                ]
-            });
-            
-            
         });
-    
 }
-
 
 const transformToList = (string) => {
     const re = /,\s/
