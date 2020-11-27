@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const Fs = require('fs');
 const CsvReadableStream = require('csv-reader');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
@@ -43,6 +45,13 @@ inputStream
         //console.log(listAllCrew)
         console.log('No more rows!');
         //console.log(header)
+
+        let str = Object.keys(header[0])[0].toString()
+        for (let i = 1; i < header.length; i++) {
+            str += ',' + Object.keys(header[i])[0].toString()
+        }
+        str += '\n'
+        fs.writeFileSync('test.csv', str);
         readIMDBMovies()
     });
 
@@ -53,13 +62,12 @@ const readIMDBMovies = () => {
         .pipe(new CsvReadableStream({parseNumbers: true, parseBooleans: true, trim: true, asObject: true}))
         .on('data', function (row) {
             //console.log(row)
-            if (v === 3) {
+            if (v === 2) {
                 v++
-                //console.log(row)
                 let actorList = transformToList(row.actors)
                 console.log(actorList)
                 for (let i = 22; i < header.length; i++) {
-                    if(actorList.includes(Object.keys(header[i])[0])){
+                    if (actorList.includes(Object.keys(header[i])[0])) {
                         console.log(Object.keys(header[i])[0])
                     }
                     row[Object.keys(header[i])[0]] = actorList.includes(Object.keys(header[i])[0]) ? 1 : 0
@@ -69,20 +77,18 @@ const readIMDBMovies = () => {
 
                 console.log('aaaaaa')
 
-                //console.log(row)
-                data.push(row)
-                const csvWriter = createCsvWriter({
-                    path: 'out.csv',
-                    header
+                let list = [...Object.keys(row)]
+                let str = row[list[0]].toString()
+                for (let i = 1; i < list.length; i++) {
+                    str += ',' + row[list[i]].toString()
+                }
+                console.log('depois')
+               fs.appendFile('test.csv', str, function (err) {
+                    if (err) throw err;
+                    console.log('Saved!');
                 });
 
-                csvWriter
-                    .writeRecords(data)
-                    .then(() => console.log('The CSV file was written successfully'));
-
-            } else {
-                v++
-            }
+            }else v++
         })
         .on('end', function (data) {
             console.log('No more rows!');
